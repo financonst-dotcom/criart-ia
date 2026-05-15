@@ -64,7 +64,7 @@ export default function RemoveBgPage() {
           <span className="text-sm font-semibold text-foreground">Resultado</span>
           {status === "done" && result ? (
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-3">
-              <div className="aspect-square rounded-xl overflow-hidden bg-[url('data:image/svg+xml,%3Csvg width=\"20\" height=\"20\" xmlns=\"http://www.w3.org/2000/svg\"%3E%3Crect width=\"10\" height=\"10\" fill=\"%23ccc\"%2F%3E%3Crect x=\"10\" y=\"10\" width=\"10\" height=\"10\" fill=\"%23ccc\"%2F%3E%3Crect x=\"10\" y=\"0\" width=\"10\" height=\"10\" fill=\"%23fff\"%2F%3E%3Crect x=\"0\" y=\"10\" width=\"10\" height=\"10\" fill=\"%23fff\"%2F%3E%3C%2Fsvg%3E')]">
+              <div className="aspect-square rounded-xl overflow-hidden" style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg width='20' height='20' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='10' height='10' fill='%23ccc'/%3E%3Crect x='10' y='10' width='10' height='10' fill='%23ccc'/%3E%3Crect x='10' y='0' width='10' height='10' fill='%23fff'/%3E%3Crect x='0' y='10' width='10' height='10' fill='%23fff'/%3E%3C/svg%3E\")" }}>
                 <img src={result} alt="Sem fundo" className="w-full h-full object-contain" />
               </div>
               <Button size="sm" className="w-full gap-2" onClick={() => { const a = document.createElement("a"); a.href = result!; a.download = "sem-fundo.png"; a.click(); }}>

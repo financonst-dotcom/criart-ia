@@ -1,6 +1,8 @@
 import { redirect } from "next/navigation";
 import { getSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+
+export const dynamic = "force-dynamic";
 import Link from "next/link";
 import { LayoutDashboard, Users, CreditCard, Zap, Settings, BarChart3, Shield } from "lucide-react";
 

@@ -1,6 +1,8 @@
 import { prisma } from "@/lib/prisma";
 import { Search } from "lucide-react";
 
+export const dynamic = "force-dynamic";
+
 export default async function AdminUsersPage({
   searchParams,
 }: {
@@ -12,7 +14,7 @@ export default async function AdminUsersPage({
   const pageSize = 20;
 
   const where = q
-    ? { OR: [{ email: { contains: q, mode: "insensitive" as const } }, { name: { contains: q, mode: "insensitive" as const } }] }
+    ? { OR: [{ email: { contains: q } }, { name: { contains: q } }] }
     : {};
 
   const [users, total] = await Promise.all([

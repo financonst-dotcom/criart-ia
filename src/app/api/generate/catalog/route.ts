@@ -1,9 +1,11 @@
-import { NextResponse } from "next/server";
+﻿import { NextResponse } from "next/server";
 import { z } from "zod";
 import { getSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { falGenerate, FAL_MODELS } from "@/lib/ai/fal";
 import { GENERATION_COSTS } from "@/lib/utils";
+
+export const dynamic = "force-dynamic";
 
 const productSchema = z.object({
   id: z.string(),
@@ -30,11 +32,11 @@ const STYLE_PROMPTS: Record<string, string> = {
 export async function POST(req: Request) {
   try {
     const session = await getSession();
-    if (!session) return NextResponse.json({ error: "Não autenticado" }, { status: 401 });
+    if (!session) return NextResponse.json({ error: "NÃ£o autenticado" }, { status: 401 });
 
     const body = await req.json();
     const parsed = schema.safeParse(body);
-    if (!parsed.success) return NextResponse.json({ error: "Dados inválidos" }, { status: 400 });
+    if (!parsed.success) return NextResponse.json({ error: "Dados invÃ¡lidos" }, { status: 400 });
 
     const { products, catalogStyle, brandName, description } = parsed.data;
     const validProducts = products.filter((p) => p.image);
@@ -42,7 +44,7 @@ export async function POST(req: Request) {
 
     const user = await prisma.user.findUnique({ where: { id: session.userId }, select: { credits: true } });
     if (!user || user.credits < cost) {
-      return NextResponse.json({ error: "Créditos insuficientes" }, { status: 402 });
+      return NextResponse.json({ error: "CrÃ©ditos insuficientes" }, { status: 402 });
     }
 
     const inputImages = validProducts.map((p) => p.image as string);
@@ -99,6 +101,6 @@ export async function POST(req: Request) {
     return NextResponse.json({ generationId: generation.id, images });
   } catch (error) {
     console.error("Catalog generation error:", error);
-    return NextResponse.json({ error: "Erro na geração do catálogo" }, { status: 500 });
+    return NextResponse.json({ error: "Erro na geraÃ§Ã£o do catÃ¡logo" }, { status: 500 });
   }
 }

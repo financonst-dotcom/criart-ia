@@ -1,9 +1,11 @@
-import { NextResponse } from "next/server";
+﻿import { NextResponse } from "next/server";
 import { z } from "zod";
 import { getSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { falGenerate, FAL_MODELS } from "@/lib/ai/fal";
 import { GENERATION_COSTS } from "@/lib/utils";
+
+export const dynamic = "force-dynamic";
 
 const schema = z.object({
   gender: z.enum(["feminine", "masculine", "neutral"]).default("feminine"),
@@ -43,7 +45,7 @@ export async function POST(req: Request) {
   try {
     const session = await getSession();
     if (!session) {
-      return NextResponse.json({ error: "Não autenticado" }, { status: 401 });
+      return NextResponse.json({ error: "NÃ£o autenticado" }, { status: 401 });
     }
 
     const body = await req.json();
@@ -62,7 +64,7 @@ export async function POST(req: Request) {
 
     if (!user || user.credits < totalCost) {
       return NextResponse.json(
-        { error: `Créditos insuficientes. Necessário: ${totalCost}` },
+        { error: `CrÃ©ditos insuficientes. NecessÃ¡rio: ${totalCost}` },
         { status: 402 }
       );
     }
@@ -88,7 +90,7 @@ export async function POST(req: Request) {
           type: "CONSUMPTION",
           amount: -totalCost,
           balance: user.credits - totalCost,
-          description: `Criação de avatar - ${numImages} imagem(ns)`,
+          description: `CriaÃ§Ã£o de avatar - ${numImages} imagem(ns)`,
           generationId: generation.id,
         },
       }),
@@ -139,7 +141,7 @@ export async function POST(req: Request) {
         where: { id: generation.id },
         data: { status: "FAILED" },
       });
-      return NextResponse.json({ error: "Falha na criação do avatar" }, { status: 500 });
+      return NextResponse.json({ error: "Falha na criaÃ§Ã£o do avatar" }, { status: 500 });
     }
 
     await prisma.generation.update({

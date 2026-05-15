@@ -1,7 +1,9 @@
-import { NextResponse } from "next/server";
+﻿import { NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { hashPassword, signToken, setAuthCookie } from "@/lib/auth";
+
+export const dynamic = "force-dynamic";
 
 const schema = z.object({
   name: z.string().min(2).max(100),
@@ -27,7 +29,7 @@ export async function POST(req: Request) {
     const existing = await prisma.user.findUnique({ where: { email } });
     if (existing) {
       return NextResponse.json(
-        { error: "Email já cadastrado" },
+        { error: "Email jÃ¡ cadastrado" },
         { status: 409 }
       );
     }
@@ -58,7 +60,7 @@ export async function POST(req: Request) {
         type: "BONUS",
         amount: 10,
         balance: 10,
-        description: "Bônus de boas-vindas",
+        description: "BÃ´nus de boas-vindas",
       },
     });
 

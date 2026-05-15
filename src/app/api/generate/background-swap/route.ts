@@ -1,9 +1,11 @@
-import { NextResponse } from "next/server";
+﻿import { NextResponse } from "next/server";
 import { z } from "zod";
 import { getSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { falGenerate, FAL_MODELS } from "@/lib/ai/fal";
 import { GENERATION_COSTS } from "@/lib/utils";
+
+export const dynamic = "force-dynamic";
 
 const schema = z.object({
   imageUrl: z.string().url(),
@@ -25,11 +27,11 @@ const PRESET_PROMPTS: Record<string, string> = {
 export async function POST(req: Request) {
   try {
     const session = await getSession();
-    if (!session) return NextResponse.json({ error: "Não autenticado" }, { status: 401 });
+    if (!session) return NextResponse.json({ error: "NÃ£o autenticado" }, { status: 401 });
 
     const body = await req.json();
     const parsed = schema.safeParse(body);
-    if (!parsed.success) return NextResponse.json({ error: "Dados inválidos" }, { status: 400 });
+    if (!parsed.success) return NextResponse.json({ error: "Dados invÃ¡lidos" }, { status: 400 });
 
     const { imageUrl, preset, customPrompt } = parsed.data;
     const cost = GENERATION_COSTS.BACKGROUND_SWAP;
@@ -40,7 +42,7 @@ export async function POST(req: Request) {
 
     const user = await prisma.user.findUnique({ where: { id: session.userId }, select: { credits: true } });
     if (!user || user.credits < cost) {
-      return NextResponse.json({ error: "Créditos insuficientes" }, { status: 402 });
+      return NextResponse.json({ error: "CrÃ©ditos insuficientes" }, { status: 402 });
     }
 
     const bgPrompt = preset ? PRESET_PROMPTS[preset] : customPrompt!;

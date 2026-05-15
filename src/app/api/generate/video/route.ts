@@ -1,9 +1,11 @@
-import { NextResponse } from "next/server";
+﻿import { NextResponse } from "next/server";
 import { z } from "zod";
 import { getSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { falGenerate, FAL_MODELS } from "@/lib/ai/fal";
 import { GENERATION_COSTS } from "@/lib/utils";
+
+export const dynamic = "force-dynamic";
 
 const schema = z.object({
   imageUrl: z.string().url(),
@@ -15,18 +17,18 @@ const schema = z.object({
 export async function POST(req: Request) {
   try {
     const session = await getSession();
-    if (!session) return NextResponse.json({ error: "Não autenticado" }, { status: 401 });
+    if (!session) return NextResponse.json({ error: "NÃ£o autenticado" }, { status: 401 });
 
     const body = await req.json();
     const parsed = schema.safeParse(body);
-    if (!parsed.success) return NextResponse.json({ error: "Dados inválidos" }, { status: 400 });
+    if (!parsed.success) return NextResponse.json({ error: "Dados invÃ¡lidos" }, { status: 400 });
 
     const { imageUrl, motionStyle, duration, prompt } = parsed.data;
     const cost = GENERATION_COSTS.VIDEO;
 
     const user = await prisma.user.findUnique({ where: { id: session.userId }, select: { credits: true } });
     if (!user || user.credits < cost) {
-      return NextResponse.json({ error: "Créditos insuficientes" }, { status: 402 });
+      return NextResponse.json({ error: "CrÃ©ditos insuficientes" }, { status: 402 });
     }
 
     const generation = await prisma.generation.create({
@@ -60,7 +62,7 @@ export async function POST(req: Request) {
     });
 
     const videoUrl = result.video?.url || (typeof result.output === "string" ? result.output : null);
-    if (!videoUrl) throw new Error("Sem resultado de vídeo");
+    if (!videoUrl) throw new Error("Sem resultado de vÃ­deo");
 
     await prisma.generation.update({
       where: { id: generation.id },
@@ -70,6 +72,6 @@ export async function POST(req: Request) {
     return NextResponse.json({ generationId: generation.id, video: videoUrl });
   } catch (error) {
     console.error("Video generation error:", error);
-    return NextResponse.json({ error: "Erro na geração de vídeo" }, { status: 500 });
+    return NextResponse.json({ error: "Erro na geraÃ§Ã£o de vÃ­deo" }, { status: 500 });
   }
 }

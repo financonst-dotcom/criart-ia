@@ -1,7 +1,9 @@
-import { NextResponse } from "next/server";
+﻿import { NextResponse } from "next/server";
 import { getSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { generateStorageKey } from "@/lib/storage";
+
+export const dynamic = "force-dynamic";
 
 const MAX_SIZE = 10 * 1024 * 1024; // 10MB
 const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
@@ -9,15 +11,15 @@ const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
 export async function POST(req: Request) {
   try {
     const session = await getSession();
-    if (!session) return NextResponse.json({ error: "Não autenticado" }, { status: 401 });
+    if (!session) return NextResponse.json({ error: "NÃ£o autenticado" }, { status: 401 });
 
     const formData = await req.formData();
     const file = formData.get("file") as File;
 
-    if (!file) return NextResponse.json({ error: "Arquivo não encontrado" }, { status: 400 });
-    if (file.size > MAX_SIZE) return NextResponse.json({ error: "Arquivo muito grande (máx 10MB)" }, { status: 400 });
+    if (!file) return NextResponse.json({ error: "Arquivo nÃ£o encontrado" }, { status: 400 });
+    if (file.size > MAX_SIZE) return NextResponse.json({ error: "Arquivo muito grande (mÃ¡x 10MB)" }, { status: 400 });
     if (!ALLOWED_TYPES.includes(file.type)) {
-      return NextResponse.json({ error: "Tipo de arquivo não suportado" }, { status: 400 });
+      return NextResponse.json({ error: "Tipo de arquivo nÃ£o suportado" }, { status: 400 });
     }
 
     const arrayBuffer = await file.arrayBuffer();

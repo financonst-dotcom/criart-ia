@@ -1,11 +1,13 @@
-import { NextResponse } from "next/server";
+﻿import { NextResponse } from "next/server";
 import { getSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+
+export const dynamic = "force-dynamic";
 
 export async function GET() {
   try {
     const session = await getSession();
-    if (!session) return NextResponse.json({ error: "Não autenticado" }, { status: 401 });
+    if (!session) return NextResponse.json({ error: "NÃ£o autenticado" }, { status: 401 });
 
     const user = await prisma.user.findUnique({
       where: { id: session.userId },
@@ -24,7 +26,7 @@ export async function GET() {
       },
     });
 
-    if (!user) return NextResponse.json({ error: "Usuário não encontrado" }, { status: 404 });
+    if (!user) return NextResponse.json({ error: "UsuÃ¡rio nÃ£o encontrado" }, { status: 404 });
 
     return NextResponse.json(user);
   } catch {
@@ -35,7 +37,7 @@ export async function GET() {
 export async function PATCH(req: Request) {
   try {
     const session = await getSession();
-    if (!session) return NextResponse.json({ error: "Não autenticado" }, { status: 401 });
+    if (!session) return NextResponse.json({ error: "NÃ£o autenticado" }, { status: 401 });
 
     const body = await req.json();
     const { name, avatar } = body;

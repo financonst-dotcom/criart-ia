@@ -1,7 +1,9 @@
-import { NextResponse } from "next/server";
+﻿import { NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { comparePassword, signToken, setAuthCookie } from "@/lib/auth";
+
+export const dynamic = "force-dynamic";
 
 const schema = z.object({
   email: z.string().email(),
@@ -15,7 +17,7 @@ export async function POST(req: Request) {
 
     if (!parsed.success) {
       return NextResponse.json(
-        { error: "Dados inválidos" },
+        { error: "Dados invÃ¡lidos" },
         { status: 400 }
       );
     }

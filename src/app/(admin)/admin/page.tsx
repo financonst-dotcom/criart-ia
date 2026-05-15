@@ -1,6 +1,8 @@
 import { prisma } from "@/lib/prisma";
 import { Users, Zap, CreditCard, TrendingUp } from "lucide-react";
 
+export const dynamic = "force-dynamic";
+
 async function getStats() {
   const [totalUsers, totalGenerations, activeSubscriptions, totalRevenue] = await Promise.all([
     prisma.user.count(),

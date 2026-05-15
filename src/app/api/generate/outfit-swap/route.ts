@@ -1,9 +1,11 @@
-import { NextResponse } from "next/server";
+﻿import { NextResponse } from "next/server";
 import { z } from "zod";
 import { getSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { falGenerate, FAL_MODELS } from "@/lib/ai/fal";
 import { GENERATION_COSTS } from "@/lib/utils";
+
+export const dynamic = "force-dynamic";
 
 const schema = z.object({
   garmentImage: z.string().url(),
@@ -26,7 +28,7 @@ export async function POST(req: Request) {
   try {
     const session = await getSession();
     if (!session) {
-      return NextResponse.json({ error: "Não autenticado" }, { status: 401 });
+      return NextResponse.json({ error: "NÃ£o autenticado" }, { status: 401 });
     }
 
     const body = await req.json();
@@ -51,7 +53,7 @@ export async function POST(req: Request) {
 
     if (!user || user.credits < totalCost) {
       return NextResponse.json(
-        { error: `Créditos insuficientes. Necessário: ${totalCost}, disponível: ${user?.credits || 0}` },
+        { error: `CrÃ©ditos insuficientes. NecessÃ¡rio: ${totalCost}, disponÃ­vel: ${user?.credits || 0}` },
         { status: 402 }
       );
     }
@@ -160,14 +162,14 @@ export async function POST(req: Request) {
             type: "REFUND",
             amount: totalCost,
             balance: user.credits,
-            description: "Reembolso - falha na geração",
+            description: "Reembolso - falha na geraÃ§Ã£o",
             generationId: generation.id,
           },
         }),
       ]);
 
       return NextResponse.json(
-        { error: "Falha na geração de imagens. Créditos reembolsados." },
+        { error: "Falha na geraÃ§Ã£o de imagens. CrÃ©ditos reembolsados." },
         { status: 500 }
       );
     }
@@ -191,7 +193,7 @@ export async function POST(req: Request) {
   } catch (error) {
     console.error("Outfit swap error:", error);
     return NextResponse.json(
-      { error: "Erro interno na geração" },
+      { error: "Erro interno na geraÃ§Ã£o" },
       { status: 500 }
     );
   }

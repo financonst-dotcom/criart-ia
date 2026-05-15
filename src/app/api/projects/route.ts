@@ -1,7 +1,9 @@
-import { NextResponse } from "next/server";
+﻿import { NextResponse } from "next/server";
 import { z } from "zod";
 import { getSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+
+export const dynamic = "force-dynamic";
 
 const createSchema = z.object({
   name: z.string().min(1).max(100),
@@ -11,7 +13,7 @@ const createSchema = z.object({
 export async function GET(req: Request) {
   try {
     const session = await getSession();
-    if (!session) return NextResponse.json({ error: "Não autenticado" }, { status: 401 });
+    if (!session) return NextResponse.json({ error: "NÃ£o autenticado" }, { status: 401 });
 
     const { searchParams } = new URL(req.url);
     const page = parseInt(searchParams.get("page") || "1");
@@ -21,7 +23,7 @@ export async function GET(req: Request) {
     const where = {
       userId: session.userId,
       status: "ACTIVE" as const,
-      ...(search && { name: { contains: search, mode: "insensitive" as const } }),
+      ...(search && { name: { contains: search } }),
     };
 
     const [projects, total] = await Promise.all([
@@ -44,7 +46,7 @@ export async function GET(req: Request) {
 export async function POST(req: Request) {
   try {
     const session = await getSession();
-    if (!session) return NextResponse.json({ error: "Não autenticado" }, { status: 401 });
+    if (!session) return NextResponse.json({ error: "NÃ£o autenticado" }, { status: 401 });
 
     const body = await req.json();
     const parsed = createSchema.safeParse(body);

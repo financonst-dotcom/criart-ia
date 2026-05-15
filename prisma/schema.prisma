@@ -1,0 +1,357 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── ENUMS ────────────────────────────────────────────────────────────────────
+
+enum UserRole {
+  USER
+  ADMIN
+  SUPER_ADMIN
+}
+
+enum SubscriptionPlan {
+  FREE
+  STARTER
+  PRO
+  BUSINESS
+  ENTERPRISE
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  CANCELED
+  PAST_DUE
+  TRIALING
+  INCOMPLETE
+}
+
+enum GenerationStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+}
+
+enum GenerationType {
+  OUTFIT_SWAP
+  AVATAR_CREATION
+  BACKGROUND_SWAP
+  PRODUCT_PHOTO
+  CAMPAIGN
+  UPSCALE
+  REMOVE_BG
+  VIRTUAL_TRYON
+  POSE_CHANGE
+  MOCKUP
+  VIDEO
+  CATALOG
+  SOCIAL_PACK
+}
+
+enum AssetType {
+  IMAGE
+  VIDEO
+  MASK
+  REFERENCE
+}
+
+enum ProjectStatus {
+  ACTIVE
+  ARCHIVED
+  DELETED
+}
+
+enum CreditTransactionType {
+  PURCHASE
+  CONSUMPTION
+  REFUND
+  BONUS
+  SUBSCRIPTION_RENEWAL
+}
+
+// ─── MODELS ───────────────────────────────────────────────────────────────────
+
+model User {
+  id                 String    @id @default(cuid())
+  email              String    @unique
+  emailVerified      DateTime?
+  name               String?
+  username           String?   @unique
+  avatar             String?   @db.Text
+  passwordHash       String?
+  role               UserRole  @default(USER)
+  locale             String    @default("pt-BR")
+  timezone           String    @default("America/Sao_Paulo")
+  onboardingDone     Boolean   @default(false)
+  onboardingProfile  String?
+
+  credits            Int       @default(10)
+  totalCreditsUsed   Int       @default(0)
+  totalCreditsEarned Int       @default(10)
+
+  stripeCustomerId   String?   @unique
+
+  referralCode       String?   @unique @default(cuid())
+  referredBy         String?
+
+  googleId           String?   @unique
+
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+  lastActiveAt       DateTime  @default(now())
+
+  projects           Project[]
+  generations        Generation[]
+  assets             Asset[]
+  subscription       Subscription?
+  creditTransactions CreditTransaction[]
+  brands             Brand[]
+  apiKeys            ApiKey[]
+  notifications      Notification[]
+  templates          Template[]  @relation("UserTemplates")
+
+  @@index([email])
+  @@index([stripeCustomerId])
+}
+
+model Subscription {
+  id                       String             @id @default(cuid())
+  userId                   String             @unique
+  user                     User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  plan                     SubscriptionPlan   @default(FREE)
+  status                   SubscriptionStatus @default(ACTIVE)
+
+  stripeSubscriptionId     String?            @unique
+  stripePriceId            String?
+  stripeCurrentPeriodEnd   DateTime?
+  stripeCurrentPeriodStart DateTime?
+  cancelAtPeriodEnd        Boolean            @default(false)
+
+  monthlyCredits           Int                @default(10)
+
+  trialEndsAt              DateTime?
+  currentPeriodStart       DateTime?
+  currentPeriodEnd         DateTime?
+
+  createdAt                DateTime           @default(now())
+  updatedAt                DateTime           @updatedAt
+
+  @@index([userId])
+}
+
+model CreditTransaction {
+  id           String                @id @default(cuid())
+  userId       String
+  user         User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  type         CreditTransactionType
+  amount       Int
+  balance      Int
+  description  String?
+  metadata     Json?
+
+  generationId String?
+  generation   Generation?           @relation(fields: [generationId], references: [id])
+
+  createdAt    DateTime              @default(now())
+
+  @@index([userId])
+  @@index([generationId])
+}
+
+model Project {
+  id          String        @id @default(cuid())
+  userId      String
+  user        User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  name        String
+  description String?       @db.Text
+  thumbnail   String?       @db.Text
+  status      ProjectStatus @default(ACTIVE)
+
+  brandId     String?
+  brand       Brand?        @relation(fields: [brandId], references: [id])
+
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  generations Generation[]
+  assets      Asset[]
+
+  @@index([userId])
+  @@index([status])
+}
+
+model Generation {
+  id             String           @id @default(cuid())
+  userId         String
+  user           User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  projectId      String?
+  project        Project?         @relation(fields: [projectId], references: [id])
+
+  type           GenerationType
+  status         GenerationStatus @default(PENDING)
+
+  prompt         String?          @db.Text
+  negativePrompt String?          @db.Text
+  settings       Json             @default("{}")
+
+  inputImages    Json             @default("[]")
+  outputImages   Json             @default("[]")
+  outputVideo    String?          @db.Text
+
+  creditsUsed    Int              @default(1)
+  errorMessage   String?          @db.Text
+  processingTime Int?
+  modelUsed      String?
+
+  jobId          String?
+
+  seed           Int?
+  width          Int?
+  height         Int?
+  steps          Int?
+  cfgScale       Float?
+
+  isFavorited    Boolean          @default(false)
+
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+  completedAt    DateTime?
+
+  assets             Asset[]
+  creditTransactions CreditTransaction[]
+
+  @@index([userId])
+  @@index([projectId])
+  @@index([type])
+  @@index([status])
+  @@index([createdAt])
+}
+
+model Asset {
+  id           String      @id @default(cuid())
+  userId       String
+  user         User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  projectId    String?
+  project      Project?    @relation(fields: [projectId], references: [id])
+
+  generationId String?
+  generation   Generation? @relation(fields: [generationId], references: [id])
+
+  type         AssetType
+  url          String      @db.Text
+  key          String      @db.Text
+  filename     String
+  mimeType     String
+  size         Int
+  width        Int?
+  height       Int?
+
+  isFavorited  Boolean     @default(false)
+  metadata     Json        @default("{}")
+
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+
+  @@index([userId])
+  @@index([projectId])
+  @@index([generationId])
+}
+
+model Brand {
+  id          String    @id @default(cuid())
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  name        String
+  logo        String?   @db.Text
+  colors      Json      @default("[]")
+  fonts       Json      @default("[]")
+  description String?   @db.Text
+
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  projects    Project[]
+
+  @@index([userId])
+}
+
+model Template {
+  id             String         @id @default(cuid())
+  name           String
+  description    String?        @db.Text
+  thumbnail      String         @db.Text
+  category       String
+  tags           Json           @default("[]")
+
+  prompt         String         @db.Text
+  negativePrompt String?        @db.Text
+  settings       Json           @default("{}")
+
+  type           GenerationType
+  format         String         @default("square")
+
+  isPremium      Boolean        @default(false)
+  isPublic       Boolean        @default(true)
+
+  usageCount     Int            @default(0)
+
+  createdById    String?
+  createdBy      User?          @relation("UserTemplates", fields: [createdById], references: [id])
+
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+
+  @@index([category])
+  @@index([type])
+  @@index([isPublic])
+}
+
+model ApiKey {
+  id          String    @id @default(cuid())
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  name        String
+  keyHash     String    @unique
+  prefix      String
+  lastUsedAt  DateTime?
+  expiresAt   DateTime?
+  isActive    Boolean   @default(true)
+
+  permissions Json      @default("[\"generate\"]")
+
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([userId])
+  @@index([keyHash])
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  type      String
+  title     String
+  message   String   @db.Text
+  data      Json?
+  isRead    Boolean  @default(false)
+
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([isRead])
+}

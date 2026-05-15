@@ -1,4 +1,4 @@
-﻿import { NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { z } from "zod";
 import { getSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
@@ -34,25 +34,25 @@ const BACKGROUND_PROMPTS: Record<string, string> = {
   Preto: "dark black studio background, dramatic",
   Cinza: "neutral gray studio background",
   Madeira: "natural wood table surface background",
-  MÃ¡rmore: "white marble surface background",
+  Marmore: "white marble surface background",
   Colorido: "colorful gradient background, vibrant",
 };
 
 export async function POST(req: Request) {
   try {
     const session = await getSession();
-    if (!session) return NextResponse.json({ error: "NÃ£o autenticado" }, { status: 401 });
+    if (!session) return NextResponse.json({ error: "Nao autenticado" }, { status: 401 });
 
     const body = await req.json();
     const parsed = schema.safeParse(body);
-    if (!parsed.success) return NextResponse.json({ error: "Dados invÃ¡lidos" }, { status: 400 });
+    if (!parsed.success) return NextResponse.json({ error: "Dados invalidos" }, { status: 400 });
 
     const { artImage, mockupType, background, numImages } = parsed.data;
     const cost = GENERATION_COSTS.MOCKUP * numImages;
 
     const user = await prisma.user.findUnique({ where: { id: session.userId }, select: { credits: true } });
     if (!user || user.credits < cost) {
-      return NextResponse.json({ error: "CrÃ©ditos insuficientes" }, { status: 402 });
+      return NextResponse.json({ error: "Creditos insuficientes" }, { status: 402 });
     }
 
     const generation = await prisma.generation.create({
@@ -72,7 +72,7 @@ export async function POST(req: Request) {
     });
 
     const mockupDesc = MOCKUP_PROMPTS[mockupType] || "product mockup, clean studio";
-    const bgDesc = BACKGROUND_PROMPTS[background] || "white studio background";
+    const bgDesc = BACKGROUND_PROMPTS[background] || BACKGROUND_PROMPTS["Branco"];
     const prompt = `${mockupDesc}, ${bgDesc}, professional product photography, high quality`;
 
     const images: string[] = [];
@@ -98,6 +98,6 @@ export async function POST(req: Request) {
     return NextResponse.json({ generationId: generation.id, images });
   } catch (error) {
     console.error("Mockup generation error:", error);
-    return NextResponse.json({ error: "Erro na geraÃ§Ã£o de mockup" }, { status: 500 });
+    return NextResponse.json({ error: "Erro na geracao de mockup" }, { status: 500 });
   }
 }

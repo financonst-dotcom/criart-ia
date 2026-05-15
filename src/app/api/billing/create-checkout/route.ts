@@ -1,4 +1,4 @@
-﻿import { NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { z } from "zod";
 import Stripe from "stripe";
 import { getSession } from "@/lib/auth";
@@ -19,15 +19,15 @@ const PLAN_PRICES: Record<string, string | undefined> = {
 export async function POST(req: Request) {
   try {
     const session = await getSession();
-    if (!session) return NextResponse.json({ error: "NÃ£o autenticado" }, { status: 401 });
+    if (!session) return NextResponse.json({ error: "Nao autenticado" }, { status: 401 });
 
     const body = await req.json();
     const parsed = schema.safeParse(body);
-    if (!parsed.success) return NextResponse.json({ error: "Plano invÃ¡lido" }, { status: 400 });
+    if (!parsed.success) return NextResponse.json({ error: "Plano invalido" }, { status: 400 });
 
     const { planId } = parsed.data;
     const priceId = PLAN_PRICES[planId];
-    if (!priceId) return NextResponse.json({ error: "Plano nÃ£o disponÃ­vel" }, { status: 400 });
+    if (!priceId) return NextResponse.json({ error: "Plano nao disponivel" }, { status: 400 });
 
     const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
       apiVersion: "2025-02-24.acacia",
@@ -38,7 +38,7 @@ export async function POST(req: Request) {
       select: { email: true, stripeCustomerId: true },
     });
 
-    if (!user) return NextResponse.json({ error: "UsuÃ¡rio nÃ£o encontrado" }, { status: 404 });
+    if (!user) return NextResponse.json({ error: "Usuario nao encontrado" }, { status: 404 });
 
     let customerId = user.stripeCustomerId;
     if (!customerId) {

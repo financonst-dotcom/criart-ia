@@ -12,7 +12,7 @@ export async function GET() {
     const user = await prisma.user.findUnique({
       where: { id: session.userId },
       include: { subscription: true },
-      omit: { password: true },
+      omit: { passwordHash: true },
     });
 
     if (!user) {

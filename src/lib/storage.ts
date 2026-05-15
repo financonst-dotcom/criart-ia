@@ -24,7 +24,7 @@ export async function uploadToR2(
       "Content-Type": contentType,
       "Content-Length": buffer.length.toString(),
     },
-    body: buffer,
+    body: buffer as unknown as BodyInit,
   });
 
   if (!response.ok) {
